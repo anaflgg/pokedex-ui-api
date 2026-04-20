@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = { darkMode: 'class' }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+
+    <header class="bg-red-600 text-white p-4 shadow-md flex items-center justify-between">
+
+        <h1 class="text-2xl font-bold">Pokédex</h1>
+        <button id="darkToggle" class="bg-red-700 hover:bg-red-800 px-3 py-1 rounded-full text-sm">🌙 Modo escuro</button>
+
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+
+        <div class="mb-6">
+            <input type="text" id="searchInput" placeholder="Buscar por nome ou número..." class="w-full p-3 rounded-xl border shadow-sm outline-none focus:ring-2 dark:bg-gray-800 dark:text-white dark:border-gray-700">
+        </div>
+
+        <div id="pokemonGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+
+        <div class="flex justify-center mt-8">
+            <button id="loadMore" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold transition-colors duration-200">Carregar mais</button>
+        </div>
+
+    </main>
+
+    <script src="./script.js"></script>
+</body>
+</html>
