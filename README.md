@@ -32,7 +32,7 @@ Os dados são consumidos da PokeAPI através de requisições HTTP. Inicialmente
 - Para cada Pokémon, uma nova requisição é feita para obter seus detalhes completos
 - Os dados são processados e renderizados dinamicamente no DOM
 - Cada card armazena informações usando `dataset`
-- A busca filtra os Pokémon em tempo real com base no nome ou número
+- A busca filtra em tempo real consultando uma lista completa de nomes pré-carregada, buscando os detalhes apenas dos Pokémon encontrados
 - O usuário pode alternar entre tema claro e escuro (dark mode)
 
 ---
@@ -54,13 +54,17 @@ Os dados são consumidos da PokeAPI através de requisições HTTP. Inicialmente
 - Estilização com Tailwind CSS
 - Implementação de dark mode com manipulação de classes
 - Controle de estado com paginação (offset)
+- Gerenciamento de dois modos de estado distintos (paginação e busca global)
 
 ---
 
 ### 🐛 Desafios e Soluções
 - A busca não retornava o Pokémon correto devido ao uso de índice incorreto. Resolvido utilizando `dataset` diretamente nos elementos HTML.
 - Sincronização de múltiplas requisições da API. Resolvido com `Promise.all`.
-- Controle de carregamento progressivo dos dados. Resolvido utilizando paginação com `offset`.
+- A busca em tempo real só funcionava para Pokémons já carregados na tela. Pesquisar por "Dragonite" sem tê-lo carregado não retornava nada. Resolvido 
+pré-carregando a lista completa de nomes da PokeAPI (`limit=100000`) na 
+inicialização e filtrando localmente, buscando os detalhes apenas dos resultados 
+encontrados.
 
 ---
 
