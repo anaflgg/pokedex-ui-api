@@ -51,6 +51,9 @@ function renderizarCards(lista) {
         const numero = String(pokemon.id).padStart(3, '0');
         const card = document.createElement('div');
 
+        card.dataset.name = pokemon.name;
+        card.dataset.id = pokemon.id;
+
         card.className = `
         ${corFundo} rounded-2xl p-4 flex flex-col items-center
         cursor-pointer hover:scale-105 transition-transform duration-200
@@ -84,10 +87,14 @@ btnDark.addEventListener('click', () => {
 
 inputBusca.addEventListener('input', () => {
     const termo = inputBusca.value.toLowerCase().trim();
-    grid.querySelectorAll('div').forEach((card, i) => {
-        const p = todosPokemon[i];
-        if (!p) return;
-        const bate = p.name.includes(termo) || String(p.id).includes(termo);
+
+    Array.from(grid.children).forEach((card) => {
+        const nome = card.dataset.name.toLowerCase();
+        const id = card.dataset.id;
+
+        const bate =
+            nome.includes(termo) || id.includes(termo);
+
         card.style.display = bate ? '' : 'none';
     });
 });
