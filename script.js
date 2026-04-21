@@ -1,6 +1,8 @@
 const LIMITE = 20;
 let offset = 0;
 let todosPokemon = [];
+let listaTodos = [];
+let buscando = false;
 
 const grid = document.getElementById('pokemonGrid');
 const btnCarregarMais = document.getElementById('loadMore');
@@ -18,6 +20,18 @@ const coresTipo = {
   bug: 'bg-lime-500',      ghost: 'bg-purple-800',
   steel: 'bg-slate-400',   normal: 'bg-gray-400',
 };
+
+async function carregarListaCompleta() {
+    try {
+        const resposta = await fetch(
+            'https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0'
+        );
+        const dados = await resposta.json();
+        listaTodos = dados.results;
+    } catch (erro) {
+        console.error('Erro ao carregar lista completa:', erro);
+    }
+}
 
 async function buscarPokemon() {
     btnCarregarMais.textContent = 'Carregando...'
@@ -42,6 +56,34 @@ async function buscarPokemon() {
     }
     btnCarregarMais.textContent = 'Carregar mais';
     btnCarregarMais.disabled = false;
+}
+
+async function buscarPorTermo(termo) {
+    grid.innerHTML = '';
+
+    if (listaTodos.length === 0) {
+        grid.innerHTML = `<p class="text-gray-500 col-span-full text-center">Carregando lista...</p>`;
+        await carregarListaCompleta();
+    }
+
+    const encontrados = listaTodos.filter(p => {
+        const id = p.url.split('/').filter(Boolean).pop();
+        return p.name.includes(termo) || id === termo;
+    });
+
+    if (encontrados.length === 0) {
+        grid.innerHTML = `<p class="text-gray-500 col-span-full text-center">Nenhum pokémon encontrado.</p>`;
+        return;
+    }
+
+    try {
+        const detalhes = await Promise.all(
+            encontrados.slice(0, 20).map(p => fetch(p.url).then(r => r.json()))
+        );
+        renderizarCards(detalhes);
+    } catch (erro) {
+        console.error('Erro ao buscar detalhes:', erro)
+    }
 }
 
 function renderizarCards(lista) {
@@ -88,20 +130,28 @@ btnDark.addEventListener('click', () => {
 inputBusca.addEventListener('input', () => {
     const termo = inputBusca.value.toLowerCase().trim();
 
-    Array.from(grid.children).forEach((card) => {
-        const nome = card.dataset.name.toLowerCase();
-        const id = card.dataset.id;
+    if (!termo) {
+        buscando = false;
+        btnCarregarMais.disabled = false;
+        grid.innerHTML = '';
+        if (todosPokemon.length === 0) {
+            buscarPokemon();
+        } else {
+            renderizarCards(todosPokemon);
+        }
+        return;
+    }
 
-        const bate =
-            nome.includes(termo) || id.includes(termo);
-
-        card.style.display = bate ? '' : 'none';
-    });
+    buscando = true;
+    btnCarregarMais.disabled = true;
+    buscarPorTermo(termo);
 });
 
-btnCarregarMais.addEventListener('click', buscarPokemon);
+btnCarregarMais.addEventListener('click', () => {
+    if (!buscando) buscarPokemon();
+});
 
-buscarPokemon();
+carregarListaCompleta().then(() => buscarPokemon());
 
 
 
