@@ -30,15 +30,15 @@ async function buscarPokemon() {
         const dados = await resposta.json();
 
         const detalhes = await Promise.all(
-        dados.results.map(p => fetch(p.url).then(r => r.json()))
+            dados.results.map(p => fetch(p.url).then(r => r.json()))
         );
-        
+
         todosPokemon = [...todosPokemon, ...detalhes];
         renderizarCards(detalhes);
         offset += LIMITE;
-    
+
     } catch (erro) {
-    console.error('Erro ao buscar pokémons:', erro);
+        console.error('Erro ao buscar pokémons:', erro);
     }
     btnCarregarMais.textContent = 'Carregar mais';
     btnCarregarMais.disabled = false;
@@ -52,37 +52,36 @@ function renderizarCards(lista) {
         const card = document.createElement('div');
 
         card.className = `
-        ${corFundo} rounded-2xl p-4 flex flex-col items-center
-        cursor-pointer hover:scale-105 transition-transform duration-200
-        shadow-md text-white
+            ${corFundo} rounded-2xl p-4 flex flex-col items-center
+            cursor-pointer hover:scale-105 transition-transform duration-200
+            shadow-md text-white
         `;
 
         card.innerHTML = `
-        <span class="self-end text-xs opacity-70 font-mono">#${numero}</span>
-        <img
-            src="${pokemon.sprites.other['official-artwork'].front_default}"
-            alt="${pokemon.name}"
-            class="w-24 h-24 drop-shadow-lg"
-        >
-        <p class="mt-2 font-bold capitalize">${pokemon.name}</p>
-        <div class="flex gap-1 mt-1">
-            ${pokemon.types.map(t => `
-            <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                ${t.type.name}
-            </span>
-            `).join('')}
-        </div>
+            <span class="self-end text-xs opacity-70 font-mono">#${numero}</span>
+            <img
+                src="${pokemon.sprites.other['official-artwork'].front_default}"
+                alt="${pokemon.name}"
+                class="w-24 h-24 drop-shadow-lg"
+            >
+            <p class="mt-2 font-bold capitalize">${pokemon.name}</p>
+            <div class="flex gap-1 mt-1">
+                ${pokemon.types.map(t => `
+                    <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                        ${t.type.name}
+                    </span>
+                `).join('')}
+            </div>
         `;
 
-    grid.appendChild(card);
+        card.dataset.id = pokemon.id;
+        grid.appendChild(card);
 
-    card.dataset.id = pokemon.id;
-    
-    card.addEventListener('click', () => {
-        const id = card.dataset.id;
-        const pokemonClicado = todosPokemon.find(p => p.id === Number(id));
-        abrirModal(pokemonClicado);
-    })
+        card.addEventListener('click', () => {
+            const id = card.dataset.id;
+            const pokemonClicado = todosPokemon.find(p => p.id === Number(id));
+            abrirModal(pokemonClicado);
+        });
     });
 }
 
@@ -92,20 +91,28 @@ async function buscarEspecies(id) {
     return dados;
 }
 
+function isDark() {
+    return document.documentElement.classList.contains('dark');
+}
+
 async function abrirModal(pokemon) {
     const modal = document.getElementById('modal');
     const conteudo = document.getElementById('modalConteudo');
 
-    conteudo.innerHTML = `<p class="text-center text-gray-400 py-8">Carregando...</p>`;
+    conteudo.innerHTML = `<p style="text-align:center; color: #9ca3af; padding: 2rem;">Carregando...</p>`;
     modal.classList.remove('hidden');
 
     const especies = await buscarEspecies(pokemon.id);
     const geracao = especies.generation.name.replace('generation-', 'Gen ').toUpperCase();
     const regiao = especies.generation.name
-        .replace('generation-i', 'Kanto').replace('generation-ii', 'Johto')
-        .replace('generation-iii', 'Hoenn').replace('generation-iv', 'Sinnoh')
-        .replace('generation-v', 'Unova').replace('generation-vi', 'Kalos')
-        .replace('generation-vii', 'Alola').replace('generation-viii', 'Galar')
+        .replace('generation-i', 'Kanto')
+        .replace('generation-ii', 'Johto')
+        .replace('generation-iii', 'Hoenn')
+        .replace('generation-iv', 'Sinnoh')
+        .replace('generation-v', 'Unova')
+        .replace('generation-vi', 'Kalos')
+        .replace('generation-vii', 'Alola')
+        .replace('generation-viii', 'Galar')
         .replace('generation-ix', 'Paldea');
 
     const tipo = pokemon.types[0].type.name;
@@ -118,13 +125,20 @@ async function abrirModal(pokemon) {
     const coresStat = ['#4ade80', '#fb923c', '#60a5fa', '#c084fc', '#34d399', '#f472b6'];
     const nomesStat = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed'];
 
+    const dark = isDark();
+    const bgPainel = dark ? '#1f2937' : '#ffffff';
+    const corTexto = dark ? '#ffffff' : '#111827';
+    const corMuted = dark ? '#9ca3af' : '#6b7280';
+    const bgBadge = dark ? '#374151' : '#f3f4f6';
+    const bgStat = dark ? '#374151' : '#e5e7eb';
+
     const stats = pokemon.stats.map((s, i) => `
         <div style="margin-bottom: 7px;">
             <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px;">
-                <span class="text-gray-500">${nomesStat[i]}</span>
-                <span class="font-medium dark:text-white">${s.base_stat}</span>
+                <span style="color: ${corMuted};">${nomesStat[i]}</span>
+                <span style="color: ${corTexto}; font-weight: 500;">${s.base_stat}</span>
             </div>
-            <div class="bg-gray-200 dark:bg-gray-700" style="border-radius: 99px; height: 6px; overflow: hidden;">
+            <div style="background: ${bgStat}; border-radius: 99px; height: 6px; overflow: hidden;">
                 <div style="height: 100%; width: ${Math.round(s.base_stat / 150 * 100)}%; background: ${coresStat[i]}; border-radius: 99px;"></div>
             </div>
         </div>
@@ -133,7 +147,7 @@ async function abrirModal(pokemon) {
     conteudo.innerHTML = `
         <div style="display: flex; flex-wrap: wrap; border-radius: 1rem; overflow: hidden;">
 
-            <div class="${corFundo}" style="flex: 0 0 190px; min-width: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem 1rem; gap: 6px;">
+            <div class="${corFundo}" style="flex: 1 1 190px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem 1rem; gap: 6px;">
                 <span style="font-size: 12px; color: rgba(255,255,255,0.65); font-family: monospace; align-self: flex-end;">#${numero}</span>
                 <img src="${spriteAnimado}" alt="${pokemon.name}" style="width: 110px; height: 110px; object-fit: contain; image-rendering: pixelated;">
                 <p style="color: white; font-weight: 600; font-size: 18px; margin: 0; text-transform: capitalize;">${pokemon.name}</p>
@@ -154,26 +168,26 @@ async function abrirModal(pokemon) {
                 </div>
             </div>
 
-            <div class="dark:bg-gray-800" style="flex: 1; min-width: 200px; padding: 1.25rem; background: white;">
+            <div style="flex: 2 1 220px; padding: 1.25rem; background: ${bgPainel};">
                 <div style="display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap;">
-                    <div class="dark:bg-gray-700" style="background: #f3f4f6; border-radius: 8px; padding: 6px 12px;">
-                        <p style="color: #6b7280; font-size: 11px; margin: 0;">Geração</p>
-                        <p class="dark:text-white" style="font-weight: 500; font-size: 13px; margin: 0;">${geracao}</p>
+                    <div style="background: ${bgBadge}; border-radius: 8px; padding: 6px 12px;">
+                        <p style="color: ${corMuted}; font-size: 11px; margin: 0;">Geração</p>
+                        <p style="color: ${corTexto}; font-weight: 500; font-size: 13px; margin: 0;">${geracao}</p>
                     </div>
-                    <div class="dark:bg-gray-700" style="background: #f3f4f6; border-radius: 8px; padding: 6px 12px;">
-                        <p style="color: #6b7280; font-size: 11px; margin: 0;">Região</p>
-                        <p class="dark:text-white" style="font-weight: 500; font-size: 13px; margin: 0;">${regiao}</p>
+                    <div style="background: ${bgBadge}; border-radius: 8px; padding: 6px 12px;">
+                        <p style="color: ${corMuted}; font-size: 11px; margin: 0;">Região</p>
+                        <p style="color: ${corTexto}; font-weight: 500; font-size: 13px; margin: 0;">${regiao}</p>
                     </div>
-                    <div class="dark:bg-gray-700" style="background: #f3f4f6; border-radius: 8px; padding: 6px 12px;">
-                        <p style="color: #6b7280; font-size: 11px; margin: 0;">Exp. base</p>
-                        <p class="dark:text-white" style="font-weight: 500; font-size: 13px; margin: 0;">${pokemon.base_experience}</p>
+                    <div style="background: ${bgBadge}; border-radius: 8px; padding: 6px 12px;">
+                        <p style="color: ${corMuted}; font-size: 11px; margin: 0;">Exp. base</p>
+                        <p style="color: ${corTexto}; font-weight: 500; font-size: 13px; margin: 0;">${pokemon.base_experience}</p>
                     </div>
                 </div>
 
-                <p style="font-size: 11px; font-weight: 500; color: #9ca3af; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.05em;">Stats</p>
+                <p style="font-size: 11px; font-weight: 500; color: ${corMuted}; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.05em;">Stats</p>
                 ${stats}
 
-                <button id="fecharModal" class="bg-red-600 hover:bg-red-700 text-white" style="margin-top: 12px; width: 100%; border: none; border-radius: 99px; padding: 8px; font-size: 13px; font-weight: 500; cursor: pointer;">Fechar</button>
+                <button id="fecharModal" style="margin-top: 12px; width: 100%; background: #dc2626; color: white; border: none; border-radius: 99px; padding: 8px; font-size: 13px; font-weight: 500; cursor: pointer;">Fechar</button>
             </div>
         </div>
     `;
@@ -189,14 +203,15 @@ async function abrirModal(pokemon) {
 
 btnDark.addEventListener('click', () => {
     document.documentElement.classList.toggle('dark');
-})
+});
 
 inputBusca.addEventListener('input', () => {
     const termo = inputBusca.value.toLowerCase().trim();
-    grid.querySelectorAll('div').forEach((card, i) => {
-        const p = todosPokemon[i];
-        if (!p) return;
-        const bate = p.name.includes(termo) || String(p.id).includes(termo);
+    grid.querySelectorAll('[data-id]').forEach((card) => {
+        const bate = card.dataset.id && (
+            todosPokemon.find(p => p.id === Number(card.dataset.id))?.name.includes(termo) ||
+            card.dataset.id.includes(termo)
+        );
         card.style.display = bate ? '' : 'none';
     });
 });
@@ -204,8 +219,3 @@ inputBusca.addEventListener('input', () => {
 btnCarregarMais.addEventListener('click', buscarPokemon);
 
 buscarPokemon();
-
-
-
-
-
