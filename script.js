@@ -24,6 +24,18 @@ const coresTipo = {
   steel: 'bg-slate-400',   normal: 'bg-gray-400',
 };
 
+const regioesPorGeracao = {
+  'generation-i':    { regiao: 'Kanto',  gen: 'Gen I' },
+  'generation-ii':   { regiao: 'Johto',  gen: 'Gen II' },
+  'generation-iii':  { regiao: 'Hoenn',  gen: 'Gen III' },
+  'generation-iv':   { regiao: 'Sinnoh', gen: 'Gen IV' },
+  'generation-v':    { regiao: 'Unova',  gen: 'Gen V' },
+  'generation-vi':   { regiao: 'Kalos',  gen: 'Gen VI' },
+  'generation-vii':  { regiao: 'Alola',  gen: 'Gen VII' },
+  'generation-viii': { regiao: 'Galar',  gen: 'Gen VIII' },
+  'generation-ix':   { regiao: 'Paldea', gen: 'Gen IX' },
+};
+
 const sentinela = document.createElement('div');
 sentinela.id = 'sentinela';
 sentinela.style.height = '1px';
@@ -70,6 +82,8 @@ async function buscarPokemon() {
 
 function renderizarCards(lista) {
     lista.forEach(pokemon => {
+        if (grid.querySelector(`[data-id="${pokemon.id}"]`)) return;
+
         const tipo = pokemon.types[0].type.name;
         const corFundo = coresTipo[tipo] || 'bg-gray-400';
         const numero = String(pokemon.id).padStart(3, '0');
@@ -110,9 +124,14 @@ function renderizarCards(lista) {
 }
 
 async function buscarEspecies(id) {
-    const resposta = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
-    const dados = await resposta.json();
-    return dados;
+    try {
+        const resposta = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+        if (!resposta.ok) return null;
+        const dados = await resposta.json();
+        return dados;
+    } catch {
+        return null;
+    }
 }
 
 function isDark() {
@@ -127,17 +146,11 @@ async function abrirModal(pokemon) {
     modal.classList.remove('hidden');
 
     const especies = await buscarEspecies(pokemon.id);
-    const geracao = especies.generation.name.replace('generation-', 'Gen ').toUpperCase();
-    const regiao = especies.generation.name
-        .replace('generation-i', 'Kanto')
-        .replace('generation-ii', 'Johto')
-        .replace('generation-iii', 'Hoenn')
-        .replace('generation-iv', 'Sinnoh')
-        .replace('generation-v', 'Unova')
-        .replace('generation-vi', 'Kalos')
-        .replace('generation-vii', 'Alola')
-        .replace('generation-viii', 'Galar')
-        .replace('generation-ix', 'Paldea');
+
+    const geracaoRaw = especies?.generation?.name || null;
+    const infoGeracao = regioesPorGeracao[geracaoRaw] || null;
+    const geracao = infoGeracao ? infoGeracao.gen : '—';
+    const regiao = infoGeracao ? infoGeracao.regiao : '—';
 
     const tipo = pokemon.types[0].type.name;
     const corFundo = coresTipo[tipo] || 'bg-gray-400';
@@ -247,7 +260,7 @@ inputBusca.addEventListener('input', async () => {
     for (const resultado of resultados.slice(0, 20)) {
         const jaCarregado = todosPokemon.find(p => p.name === resultado.name);
 
-        if (jaCarregado) {
+       if (jaCarregado) {
             const card = grid.querySelector(`[data-id="${jaCarregado.id}"]`);
             if (card) card.style.display = '';
         } else {
