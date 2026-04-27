@@ -1,5 +1,5 @@
 # Pokedex UI API 🧩
-![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![Status do Projeto](https://img.shields.io/badge/status-concluído-brightgreen)
 
 > Pokédex interativa que consome dados da API oficial de Pokémon, exibindo cards dinâmicos com busca em tempo real, infinite scroll e suporte a dark mode — com modal de detalhes ao clicar em cada Pokémon.
 
