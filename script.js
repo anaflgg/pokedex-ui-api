@@ -253,7 +253,11 @@ inputBusca.addEventListener('input', async () => {
 
     modoBusca = true;
 
-    const resultados = listaNomes.filter(p => p.name.includes(termo));
+    const resultados = listaNomes.filter(p => {
+    const idDaUrl = p.url.split('/')[6]; 
+    
+    return p.name.includes(termo) || idDaUrl === termo;
+});
 
     grid.querySelectorAll('[data-id]').forEach(card => card.style.display = 'none');
 
